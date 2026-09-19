@@ -922,7 +922,10 @@ export function sectionalDefenseHeroValidation(modifier, item) {
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 modifierID: modifier.ID,
             });
-        } else if (sectionalDefenseRanges.reason !== VALIDATE_SECTION_DEFENSE_ERROR_REASON.NOT_DECLARATION) {
+        } else if (
+            sectionalDefenseRanges.reason !== VALIDATE_SECTION_DEFENSE_ERROR_REASON.NO_COMMENT &&
+            sectionalDefenseRanges.reason !== VALIDATE_SECTION_DEFENSE_ERROR_REASON.NOT_DECLARATION
+        ) {
             console.error(`Unknown invalid sectional defense reason: ${sectionalDefenseRanges.reason}.`);
         }
     } else {
