@@ -13,7 +13,7 @@
   - Mid-combat SPD changes follow per-edition rules, and DEX changes re-sort live. [#4686](https://github.com/dmdorman/hero6e-foundryvtt/issues/4686)
   - Implemented per-turn DEX tie rolls, Fast Draw tie-breaks. These and and Lightning Reflexes stops that survive rewinds.
   - Combatant grouping improvements: per-segment shuffle inside groups, "Split All from Group" and "Rejoin All to Group" context options, and a new "Group Same-Actor Combatants" world setting to enable/disable grouping entirely.
-  - New "Compact Combat Tracker" option. 
+  - New "Compact Combat Tracker" option.
   - Invisible tokens are hidden from players automatically.
 - Sectional defenses are now only supported if the hit locations setting is "Hit Locations with Sectional Defense".
 - Fixed attacks with strength minima that are specifically defined rather than just using the default range. [#4647](https://github.com/dmdorman/hero6e-foundryvtt/issues/4647)
