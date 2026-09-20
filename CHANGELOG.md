@@ -1,6 +1,6 @@
 # Releases
 
-### Version 5.0.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 5.0.0 20260916 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - This (and future) releases no longer support FoundryVTT V13. This release only works with FoundryVTT V14.
 - This version forces a rebuild of every world actor and unlinked token from its stored HDC data. Actors with no stored HDC (created before October 2025) are flagged "REQUIRES HDC UPLOAD" until their .hdc file is uploaded again and cannot be used.
