@@ -3,6 +3,18 @@
 ### Version 5.0.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - This (and future) releases no longer support FoundryVTT V13. This release only works with FoundryVTT V14.
+- This version forces a rebuild of every world actor and unlinked token from its stored HDC data. Actors with no stored HDC (created before October 2025) are flagged "REQUIRES HDC UPLOAD" until their .hdc file is uploaded again and cannot be used.
+- While we will attempt to migrate combats over to the new data model, we recommend not upgrading in the middle of combat.
+- The previous combat tracker has been retired in favor of a new combat tracker. Combat tracker settings are available in both the FoundryVTT Combat Tracker settings and system settings, rather than just the latter. This new tracker allows for significant improvements in functionality, as below, as well as significantly improved performance in larger combats. [#4709](https://github.com/dmdorman/hero6e-foundryvtt/pull/4709)
+  - Significant improvements to Abort, Extra Time, Haymaker, Lightning Reflexes, and similar. [#4602](https://github.com/dmdorman/hero6e-foundryvtt/issues/4602)
+    [#4603](https://github.com/dmdorman/hero6e-foundryvtt/issues/4603) [#4689](https://github.com/dmdorman/hero6e-foundryvtt/issues/4689)
+    [#4559](https://github.com/dmdorman/hero6e-foundryvtt/issues/4559) [#4554](https://github.com/dmdorman/hero6e-foundryvtt/issues/4554) [#4526](https://github.com/dmdorman/hero6e-foundryvtt/issues/4526) [#2419](https://github.com/dmdorman/hero6e-foundryvtt/issues/2419)
+  - New "Auto-Skip Stunned Phases" setting spends a Stunned character's Phase recovering automatically. The Breakfall button is no longer offered while recovering from Stunned. [#4682](https://github.com/dmdorman/hero6e-foundryvtt/issues/4682)
+  - Mid-combat SPD changes follow per-edition rules, and DEX changes re-sort live. [#4686](https://github.com/dmdorman/hero6e-foundryvtt/issues/4686)
+  - Implemented per-turn DEX tie rolls, Fast Draw tie-breaks. These and and Lightning Reflexes stops that survive rewinds.
+  - Combatant grouping improvements: per-segment shuffle inside groups, "Split All from Group" and "Rejoin All to Group" context options, and a new "Group Same-Actor Combatants" world setting to enable/disable grouping entirely.
+  - New "Compact Combat Tracker" option.
+  - Invisible tokens are hidden from players automatically.
 - Sectional defenses are now only supported if the hit locations setting is "Hit Locations with Sectional Defense".
 - Fixed attacks with strength minima that are specifically defined rather than just using the default range. [#4647](https://github.com/dmdorman/hero6e-foundryvtt/issues/4647)
 - AOE region templates are placed on the attacking token's scene level. [#4637](https://github.com/dmdorman/hero6e-foundryvtt/issues/4637)
@@ -11,6 +23,29 @@
 - Hero prefabs can now be imported in bulk. Each prefab is now sorted in the same order as they appear in Hero Designer. [#4593](https://github.com/dmdorman/hero6e-foundryvtt/issues/4593) [#4663](https://github.com/dmdorman/hero6e-foundryvtt/issues/4663)
 - Equipment net worth and weight added to equipment tab. [#4376](https://github.com/dmdorman/hero6e-foundryvtt/issues/4376) [#4074](https://github.com/dmdorman/hero6e-foundryvtt/issues/4074) [#4075](https://github.com/dmdorman/hero6e-foundryvtt/issues/4075)
 - Improved Item Compendium and drag/drop support for containers [#4571](https://github.com/dmdorman/hero6e-foundryvtt/issues/4571) [#4635](https://github.com/dmdorman/hero6e-foundryvtt/issues/4635)
+- HDC uploads and rebuilds are roughly 3-4x faster, and very large sheets up to 18x faster. The upload progress bar now reflects actual progress. [#4730](https://github.com/dmdorman/hero6e-foundryvtt/pull/4730)
+- Significantly improved item (power, equipment, etc) editing responsiveness and fixed a number of non-functioning fields. [#4439](https://github.com/dmdorman/hero6e-foundryvtt/issues/4439) [#3551](https://github.com/dmdorman/hero6e-foundryvtt/issues/3551)
+  [#3406](https://github.com/dmdorman/hero6e-foundryvtt/issues/3406) [#4644](https://github.com/dmdorman/hero6e-foundryvtt/issues/4644) [#3499](https://github.com/dmdorman/hero6e-foundryvtt/issues/3499) [#2328](https://github.com/dmdorman/hero6e-foundryvtt/issues/2328) [#4133](https://github.com/dmdorman/hero6e-foundryvtt/issues/4133)
+- Item sheets have a "Restore from HDC" button that refills charges, clips, and END reserves. Type conversion moved to the header menu. [#4440](https://github.com/dmdorman/hero6e-foundryvtt/issues/4440)
+- All system windows have been unified under ApplicationV2, allowing for dark styling. [#4436](https://github.com/dmdorman/hero6e-foundryvtt/issues/4436) [#4590](https://github.com/dmdorman/hero6e-foundryvtt/issues/4590)
+  [#4038](https://github.com/dmdorman/hero6e-foundryvtt/issues/4038) [#4435](https://github.com/dmdorman/hero6e-foundryvtt/issues/4435) [#4155](https://github.com/dmdorman/hero6e-foundryvtt/issues/4155) [#4434](https://github.com/dmdorman/hero6e-foundryvtt/issues/4434)
+- Attacks, Defenses, and Movement tabs show frameworks and lists as collapsible group headers. Rows sort alphabetically within their group, maneuvers list alphabetically, and search keeps matches visible inside collapsed frameworks.
+- All system dialogs are now styled and follow the theme of the sheet that opened them. Sheet theme choices are also available on the Active Effect config.
+- You can now drop items from compendiums into Attacks, Defenses, and Maneuver tabs. [#4731](https://github.com/dmdorman/hero6e-foundryvtt/issues/4731)
+- Delayed Return Rate is implemented for Flash and other sense-affecting powers. [#4739](https://github.com/dmdorman/hero6e-foundryvtt/issues/4739)
+- Movement END is computed from "metres actually moved" on any grid scale, and Active Effect-granted movement is no longer double-counted. [#4726](https://github.com/dmdorman/hero6e-foundryvtt/issues/4726) [#4740](https://github.com/dmdorman/hero6e-foundryvtt/issues/4740)
+- Movement modes adjusted to 0 or below stay in the token HUD at 0m. [#4725](https://github.com/dmdorman/hero6e-foundryvtt/issues/4725)
+- Autofire granted by a naked advantage is honored. [#4727](https://github.com/dmdorman/hero6e-foundryvtt/issues/4727)
+- To-hit rolls show "0 OCV" rather than omitting tag when OCV is 0. [#4741](https://github.com/dmdorman/hero6e-foundryvtt/issues/4741)
+- Custom martial maneuvers show damage dice and add STR damage. [#3404](https://github.com/dmdorman/hero6e-foundryvtt/issues/3404) [#3804](https://github.com/dmdorman/hero6e-foundryvtt/issues/3804) [#3808](https://github.com/dmdorman/hero6e-foundryvtt/issues/3808)
+- Drained defenses no longer go negative and add to damage. [#4581](https://github.com/dmdorman/hero6e-foundryvtt/issues/4581)
+- Natural BODY healing works while other effects are disabled or suppressed.
+- Uploads and item edits no longer create duplicate active effects.
+- Fixed 1"/2m 5e AoE sizing and Explosion falloff on V14 regions and non-metric scenes. [#4548](https://github.com/dmdorman/hero6e-foundryvtt/issues/4548)
+- Fixed compound powers breaking inside a VPP and STR-enhanced weapons crashing conditional defense prompts. [#4648](https://github.com/dmdorman/hero6e-foundryvtt/issues/4648) [#4654](https://github.com/dmdorman/hero6e-foundryvtt/issues/4654)
+- Token tint properly clears on full health and recovery. [#2914](https://github.com/dmdorman/hero6e-foundryvtt/issues/2914)
+- Fixed the THROUGHOUT adder crashing the actor sheet. [#4610](https://github.com/dmdorman/hero6e-foundryvtt/issues/4610)
+- Fixed Grab and Escape roll cards crashing with hit locations enabled. [#4763](https://github.com/dmdorman/hero6e-foundryvtt/issues/4763)
 
 ### Version 4.3.17 20260725
 

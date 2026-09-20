@@ -29,6 +29,8 @@
         .folder-header.hero-header-#{$kind} {
             background-color: color-mix(in srgb, $color 25%, var(--hero-surface-raised));
             border-left: 3px solid $color;
+            color: var(--hero-text-header);
+            text-shadow: none;
 
             i.fa-folder,
             i.fa-folder-open {

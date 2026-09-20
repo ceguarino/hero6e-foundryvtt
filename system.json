@@ -2,17 +2,18 @@
     "id": "hero6efoundryvttv2",
     "title": "Hero System 6e (Unofficial) v2",
     "description": "The Hero System 6e for FoundryVTT!",
-    "version": "4.3.17",
+    "version": "5.0.0",
     "compatibility": {
         "minimum": "14",
-        "verified": "14.366",
+        "verified": "14.368",
         "maximum": "14"
     },
     "authors": [
         { "name": "Jared Levine" },
         { "name": "BoDiddleyBeat" },
         { "name": "Aaron Auseth" },
-        { "name": "Peter Hunnisett" }
+        { "name": "Peter Hunnisett" },
+        { "name": "Caitlin Guarino" }
     ],
     "documentTypes": {
         "Actor": {
