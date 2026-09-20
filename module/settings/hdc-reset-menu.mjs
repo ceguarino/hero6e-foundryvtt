@@ -118,6 +118,7 @@ export class HdcResetMenu extends HeroAppMixin(HandlebarsApplicationMixin(Applic
                 try {
                     await actor.uploadFromXml(actor.system._hdcXml, {
                         keepExistingImage: true,
+                        keepExistingName: true,
                         silent: true,
                         allowTokenActor: true,
                         skipExtraItemsPrompt: true,

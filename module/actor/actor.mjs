@@ -2524,7 +2524,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             throw new Error("Cannot reset unlinked actor");
         }
 
-        await this.uploadFromXml(xml, { keepExistingImage: true });
+        await this.uploadFromXml(xml, { keepExistingImage: true, keepExistingName: true });
     }
 
     async rebuildActor() {
@@ -2535,7 +2535,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             throw new Error("Cannot rebuild unlinked actor");
         }
 
-        await this.uploadFromXml(xml, { keepExistingImage: true, rebuild: true });
+        await this.uploadFromXml(xml, { keepExistingImage: true, keepExistingName: true, rebuild: true });
     }
 
     async restoreUnlinkedActorToMatchPrototype() {
