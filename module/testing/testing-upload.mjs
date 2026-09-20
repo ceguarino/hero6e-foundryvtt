@@ -1,6 +1,7 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { isDefaultActorName, resolveUploadName } from "../actor/actor-upload.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { calculateStrengthMinimumForItem } from "../utility/damage.mjs";
@@ -12246,6 +12247,188 @@ export function registerUploadTests(quench) {
                         it("roll", function () {
                             assert.equal(item.system.roll, "14-");
                         });
+                    });
+                });
+
+                describe("Actor name on upload", function () {
+                    // Minimal full character so the upload runs the whole pipeline
+                    const characterXml = (characterName) => `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                            <CHARACTER_INFO CHARACTER_NAME="${characterName}" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                                <BACKGROUND />
+                                <PERSONALITY />
+                                <QUOTE />
+                                <TACTICS />
+                                <CAMPAIGN_USE />
+                                <APPEARANCE />
+                                <NOTES1 />
+                                <NOTES2 />
+                                <NOTES3 />
+                                <NOTES4 />
+                                <NOTES5 />
+                            </CHARACTER_INFO>
+                            <CHARACTERISTICS>
+                            <STR XMLID="STR" ID="1790000000001" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </STR>
+                            <DEX XMLID="DEX" ID="1790000000002" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </DEX>
+                            <CON XMLID="CON" ID="1790000000003" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </CON>
+                            <BODY XMLID="BODY" ID="1790000000004" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </BODY>
+                            <INT XMLID="INT" ID="1790000000005" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </INT>
+                            <EGO XMLID="EGO" ID="1790000000006" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </EGO>
+                            <PRE XMLID="PRE" ID="1790000000007" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </PRE>
+                            <PD XMLID="PD" ID="1790000000008" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </PD>
+                            <ED XMLID="ED" ID="1790000000009" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </ED>
+                            <SPD XMLID="SPD" ID="1790000000010" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </SPD>
+                            <REC XMLID="REC" ID="1790000000011" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </REC>
+                            <END XMLID="END" ID="1790000000012" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </END>
+                            <STUN XMLID="STUN" ID="1790000000013" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </STUN>
+                            <RUNNING XMLID="RUNNING" ID="1790000000014" BASECOST="0.0" LEVELS="0" ALIAS="RUNNING" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </RUNNING>
+                            <SWIMMING XMLID="SWIMMING" ID="1790000000015" BASECOST="0.0" LEVELS="0" ALIAS="SWIMMING" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </SWIMMING>
+                            <LEAPING XMLID="LEAPING" ID="1790000000016" BASECOST="0.0" LEVELS="0" ALIAS="LEAPING" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </LEAPING>
+                            </CHARACTERISTICS>
+                            <SKILLS />
+                            <PERKS />
+                            <TALENTS />
+                            <MARTIALARTS />
+                            <POWERS />
+                            <DISADVANTAGES />
+                            <EQUIPMENT />
+                        </CHARACTER>
+                    `;
+
+                    let actor;
+                    let hdcName;
+                    let foundryName;
+
+                    before(async function () {
+                        actor = await createQuenchActor({
+                            quench: this,
+                            contents: characterXml("TEST Name Upload"),
+                            is5e: false,
+                        });
+                        // createQuenchActor writes its own unique name into CHARACTER_NAME before uploading
+                        hdcName = actor.name;
+                        foundryName = `${hdcName} Renamed`;
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("first upload records the HDC name on the actor and its prototype token", function () {
+                        assert.equal(actor.system.CHARACTER.CHARACTER_INFO.CHARACTER_NAME, hdcName);
+                        assert.equal(actor.prototypeToken.name, hdcName);
+                    });
+
+                    it("a never-uploaded actor with a custom name still conflicts", function () {
+                        const fresh = new HeroSystem6eActor({ name: "John Doe", type: "pc" }, {});
+                        assert.deepEqual(resolveUploadName({ actor: fresh, hdcName: "Average Person" }), {
+                            name: "Average Person",
+                            conflict: true,
+                        });
+                    });
+
+                    it("recognises Foundry default names for the actor type", function () {
+                        for (const name of ["PC", "PC (2)", "PC (17)", "Actor", "Actor (3)"]) {
+                            const named = new HeroSystem6eActor({ name, type: "pc" }, {});
+                            assert.isTrue(isDefaultActorName(named), `"${name}" is a default name`);
+                        }
+                        for (const name of ["NPC", "PC 2", "PC (two)", "Bob", hdcName]) {
+                            const named = new HeroSystem6eActor({ name, type: "pc" }, {});
+                            assert.isFalse(isDefaultActorName(named), `"${name}" is not a default pc name`);
+                        }
+                    });
+
+                    it("a default-named actor takes the HDC name even after a Foundry rename", async function () {
+                        await actor.update({ name: "PC (2)" });
+                        assert.deepEqual(resolveUploadName({ actor, hdcName }), { name: hdcName, conflict: false });
+                        assert.deepEqual(resolveUploadName({ actor, hdcName, options: { keepExistingName: true } }), {
+                            name: hdcName,
+                            conflict: false,
+                        });
+                        await actor.update({ name: hdcName });
+                    });
+
+                    it("an unchanged HDC name is not a conflict", function () {
+                        assert.deepEqual(resolveUploadName({ actor, hdcName }), { name: hdcName, conflict: false });
+                    });
+
+                    it("a rename made in Hero Designer is a conflict", function () {
+                        assert.deepEqual(resolveUploadName({ actor, hdcName: `${hdcName} HD` }), {
+                            name: `${hdcName} HD`,
+                            conflict: true,
+                        });
+                    });
+
+                    it("a rename made in Foundry conflicts with the HDC name", async function () {
+                        await actor.update({ name: foundryName });
+                        assert.deepEqual(resolveUploadName({ actor, hdcName }), { name: hdcName, conflict: true });
+                    });
+
+                    it("a legacy actor with no stored HDC or upload stamp still conflicts", async function () {
+                        await actor.update({ "system._hdcXml": "", "system.versionHeroSystem6eUpload": "" });
+                        assert.deepEqual(resolveUploadName({ actor, hdcName: "Average Person" }), {
+                            name: "Average Person",
+                            conflict: true,
+                        });
+                    });
+
+                    it("keepExistingName resolves the conflict in favour of the Foundry name", function () {
+                        assert.deepEqual(resolveUploadName({ actor, hdcName, options: { keepExistingName: true } }), {
+                            name: foundryName,
+                            conflict: false,
+                        });
+                    });
+
+                    it("re-upload with keepExistingName keeps the Foundry name but stores the HDC name", async function () {
+                        await actor.uploadFromXml(characterXml(hdcName), {
+                            quenchUpload: true,
+                            keepExistingName: true,
+                        });
+
+                        assert.equal(actor.name, foundryName);
+                        assert.equal(actor.prototypeToken.name, foundryName);
+                        assert.equal(actor.system.CHARACTER.CHARACTER_INFO.CHARACTER_NAME, hdcName);
+                    });
+
+                    it("re-upload without keepExistingName applies the HDC name", async function () {
+                        await actor.uploadFromXml(characterXml(hdcName), { quenchUpload: true });
+
+                        assert.equal(actor.name, hdcName);
+                        assert.equal(actor.prototypeToken.name, hdcName);
                     });
                 });
             });

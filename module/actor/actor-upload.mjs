@@ -7,7 +7,7 @@ import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { FilePicker } = foundry.applications.apps;
-const { Item } = foundry.documents;
+const { Actor, Item } = foundry.documents;
 
 export async function uploadActorFromXml(actor, xml, options = {}) {
     // allowTokenActor: managed flows only; interactive uploads belong on the prototype actor
@@ -49,7 +49,7 @@ export async function uploadActorFromXml(actor, xml, options = {}) {
         captureRetainedValues(ctx);
         createUploadProgressBar(ctx);
         announceUploadStart(ctx);
-        prepareCoreChanges(ctx);
+        await prepareCoreChanges(ctx);
         await applyEditionAndActorType(ctx);
         await applyCharacteristics(ctx);
         await rebuildAndAddFreeStuff(ctx);
@@ -216,13 +216,63 @@ function announceUploadStart(ctx) {
     }
 }
 
-function prepareCoreChanges(ctx) {
-    const { actor, options, root, uploadProgressBar, retainValuesOnUpload } = ctx;
+/**
+ * Decide which name the upload should leave on the actor.
+ *
+ * A Foundry default name is always replaced by the HDC name. Any other differing name is a conflict:
+ * the caller either keeps it (keepExistingName) or asks the user. No upload history is consulted,
+ * so a renamed actor is protected even when it predates the stored HDC and upload version stamp.
+ */
+export function resolveUploadName({ actor, hdcName, options = {} }) {
+    const existingName = actor.name;
+    if (!hdcName || hdcName === existingName) {
+        return { name: existingName, conflict: false };
+    }
+    if (isDefaultActorName(actor)) {
+        return { name: hdcName, conflict: false };
+    }
+    if (options.keepExistingName) {
+        return { name: existingName, conflict: false };
+    }
+
+    return { name: hdcName, conflict: true };
+}
+
+// Matches Actor.defaultName output: the localized type label (or "Actor"), optionally with a " (n)" suffix
+export function isDefaultActorName(actor) {
+    const baseKeys = [CONFIG.Actor.typeLabels?.[actor.type], Actor.metadata.label].filter((k) => k && game.i18n.has(k));
+    return baseKeys.some((key) => {
+        const base = game.i18n.localize(key).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return new RegExp(`^${base}( \\(\\d+\\))?$`).test(actor.name ?? "");
+    });
+}
+
+async function promptForUploadName(actor, hdcName) {
+    const choice = await HeroDialogV2.wait({
+        window: { title: "Choose actor name" },
+        content: `
+            <p>This actor is named <b>${actor.name}</b> in Foundry but <b>${hdcName}</b> in the HDC file.</p>
+            <p>Do you want to keep the existing name or use the name from the HDC file?</p>`,
+        buttons: [
+            { action: "keepName", label: "Keep Existing Name", default: true },
+            { action: "hdcName", label: "Use HDC Name" },
+        ],
+        rejectClose: false,
+    });
+
+    return choice === "hdcName" ? hdcName : actor.name;
+}
+
+async function prepareCoreChanges(ctx) {
+    const { actor, options, root, silent, uploadProgressBar, retainValuesOnUpload } = ctx;
     const changes = ctx.changes;
 
     // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
-    const characterName =
-        root.CHARACTER_INFO.CHARACTER_NAME || options?.file?.name?.replace(/\.hdc$/i, "") || actor.name;
+    const hdcName = root.CHARACTER_INFO.CHARACTER_NAME || options?.file?.name?.replace(/\.hdc$/i, "");
+    let { name: characterName, conflict } = resolveUploadName({ actor, hdcName, options });
+    if (conflict && !silent) {
+        characterName = await promptForUploadName(actor, hdcName);
+    }
     actor.name = characterName;
     changes["name"] = characterName;
     uploadProgressBar.advance(`${characterName}: Name, fileInfo`, 0);
